@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    
+    <canvas id="canvas" width="300" height="300"></canvas>
+
+    <!-- 
+        npm을 설치한것 처럼 사용가능 
+        주의)  npm과 같이 서버에 올려야 동작함 (로컬에선 라이브서버 on)
+    -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.141.0/build/three.module.js",
+                "GLTFLoader": "https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import {GLTFLoader} from 'GLTFLoader';
+        import * as THREE from 'three';
+
+        /* 
+            1. 장면 만들고
+            2. 브라우저에 랜더링  
+        */
+        let scene = new THREE.Scene();
+        let renderer = new THREE.WebGLRenderer({
+            canvas:document.querySelector('#canvas'),
+            antialias:true // 모델 테두리 계단현상 방지
+        });
+        renderer.outputEncoding = THREE.sRGBEncoding; // 모델 색 정보 정상적?으로 가져오기
+
+        /* 
+            3D model 보여줄 때 필요한 것들
+            1. 카메라
+            2. 조명
+            3. 배경
+        */
+        // 1. '카메라' 종류 2가지 => PerspectiveCamera(원근법O) / OrthgraphicCamera(원근법X)
+        let camera = new THREE.PerspectiveCamera(25, 1);
+        camera.position.set(0,0,5);
+
+        // 2. '조명' 종류 3가지 => AmbientLight/PointLight/DirectionalLight
+        let light = new THREE.DirectionalLight(0xffff00, 10);
+        scene.add(light);
+        
+        // 3. '배경'
+        scene.background = new THREE.Color('white');
+
+
+        // 모델 랜더링
+        let loader = new GLTFLoader();
+        loader.load('shiba/scene.gltf', function(gltf){
+            scene.add(gltf.scene);
+            renderer.render(scene, camera);
+
+            function animate(){
+                requestAnimationFrame(animate)
+                gltf.scene.rotation.y += 0.01 // 좌우
+                gltf.scene.rotation.x += 0.001 // 위아래
+                renderer.render(scene, camera);
+            }
+            animate();
+        });
+    </script>
+
+
+</body>
+</html>
